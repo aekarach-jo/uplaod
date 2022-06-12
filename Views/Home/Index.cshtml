@@ -1,0 +1,98 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-2">
+                    <label>Name : </label>
+                </div>
+                <div class="col-md-10">
+                    <input id="txtName" type="text" placeholder="Employee Name" style="width:100%;" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                    <label>Photo : </label>
+                </div>
+                <div class="col-md-10">
+                    <input id="txtFile" type="file" placeholder="Upload File" style="width:100%;" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <img id="imgViewer" width="200" height="200" style="border:1px solid #000000; margin-top:10px;" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <button id="btnSave" class="btn btn-primary" style="width:100%; margin-top:10px;">Save Information</button>
+            <button id="btnRead" class="btn btn-danger" style="width:100%; margin-top:10px;">Read Information</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+@* <script src="~/jquery/jquery.min.js"></script> *@
+<script type="text/javascript">
+    $(document).ready(function () {
+
+    });
+
+    $("#txtFile").change(function(event){
+        var files = event.target.files;
+        $("#imgViewer").attr("src", window.URL.createObjectURL(files[0]));
+        console.log(files)
+    });
+
+    $("#btnSave").click(function () {
+        var files = $("#txtFile").prop("files");
+        var formData = new FormData();
+            console.log(files)
+
+        for (var i = 0; i < files.length; i++) {
+        formData.append("file", files[i]);
+    }
+    console.log(formData)
+    var oEmployee = {
+        Name: $("#txtName").val()
+    };
+    console.log('okkkkkk')
+    formData.append("Employee", JSON.stringify(oEmployee));
+    console.log(formData.Employee);
+    $.ajax({
+        type : "POST",
+        url: "/Home/SaveFile",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+            ResetFields();
+            alert(data);
+        },
+        error: function (data) {
+            console.log('Error : ', data);
+        }
+    });
+});
+
+    $("#btnRead").click(function () {
+        $.ajax({
+            type : "GET",
+            url: "/Home/GetSavedEmployee",
+            success: function (data) {
+                $("#txtName").val(data.Name);
+                $("#imgViewer").attr('src', "data:image/jpg;base64," + data.Photo + "");
+            },
+            error: function (data) {
+                console.log('Error : ', data);
+            }
+        });
+    });
+    function ResetFields() {
+        $("#txtName").val("");
+        $("#imgViewer").attr("src", "");
+    }
+</script>
